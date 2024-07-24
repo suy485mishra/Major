@@ -4,26 +4,26 @@ import { Footer } from "../containers";
 import { AuthButton, MainSpinner } from "../components";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
 import { toast } from "react-toastify";
-import useUser from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const Auth = () => {
-  const { data, isLoading, isError } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && data) {
-      navigate("/", { replace: true });
-    }
-  }, [isLoading, data]);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/", { replace: true });
+      }
+    });
 
-  if (isLoading) {
-    return <MainSpinner />;
-  }
+    return () => unsubscribe();
+  }, [navigate]);
 
   return (
     <div className="auth-section flex min-h-screen flex-col justify-between bg-gradient-to-r from-blue-300 to-sky-200">
-      <div className="container mt-24 mx-auto max-w-md px-4 py-12 bg-white rounded-lg shadow-md ">
+      <div className="container mt-24 mx-auto max-w-md px-4 py-12 bg-white rounded-lg shadow-md">
         <img src={Logo} alt="logo" className="w-20 h-auto mx-auto mb-8" />
 
         <h1 className="text-3xl lg:text-4xl font-bold text-center text-blue-700">
